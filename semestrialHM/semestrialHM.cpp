@@ -6,26 +6,34 @@ using namespace std;
 
 struct discipline {
     string name;
-    int grade[5];
+    int grade;
 };
 
 struct student {
     string facultyId;
     string name;
-    discipline disciplines[12];
+    discipline disciplines[6];
     string sex;
-    int age=0;
+    int age;
     string status;
 };
+
+const int disciplinesCount = 6;
+const int groupCount = 30;
 
 int mainMenu();
 int addStudentMenu();
 student createStudent();
+int printStudentsMenu();
+void printStudents(int selection,int arrayCount,student (& group)[30]);
+void sortStudentsByFN(int arrayCount, student(&group)[30]);
+bool addGrades(string fn, student(&group)[30]);
 
 
 void main()
 {
     setlocale(LC_ALL, "Bulgarian");
+    int arrayCount = 0;
     bool end = false;
     int code;
     student group[30];
@@ -40,14 +48,8 @@ void main()
                  if (selection==1)
                  {
                      student s = createStudent();
-                     for (int i = 0; i < 30; i++)
-                     {
-                         if (group[i].age == 0)
-                         {
-                             group[i] = s;
-                             break;
-                         }
-                     }
+                     group[arrayCount] = s;
+                     arrayCount++;
                  }
                  else if (selection==2)
                  {
@@ -57,28 +59,34 @@ void main()
                      for (int i = 0; i < n; i++)
                      {
                          student s = createStudent();
-                         for (int i = 0; i < 30; i++)
-                         {
-                             if (group[i].age == 0)
-                             {
-                                 group[i] = s;
-                                 break;
-                             }
-                         }
+                         group[arrayCount] = s;
+                         arrayCount++;
                      }
                  }
             }
             catch (const std::exception&)
             {
-                continue;
+                break;
             }
             break;
         }
         case 2: {
-
+            int selection = printStudentsMenu();
+            printStudents(selection, arrayCount, group);
             break;
         }
         case 3: {
+            bool found;
+            string fn;
+            student st;
+            do {
+
+                cout << "Въведете Факултетният номер на ученика." << endl;
+                cin >> fn;
+                found = addGrades(fn, group);
+                if (found==false)
+                    cout << "Не присъства такъв студент в групата" << endl;
+            } while (found==false);
             break;
         }
         case 4: {
@@ -148,29 +156,84 @@ student createStudent() {
 
     discipline disciplines[12];
     discipline ET = { "Електротехника" };
-    discipline ETLU = { "Л.У.Електротрхника" };
-    discipline ETSU = { "С.У.Електротехника" };
     discipline BP = { "Базово Програмиране" };
-    discipline BPLU = { "Л.У.Базово Програмиране" };
-    discipline BPSU = { "С.У.Базово Програмиране" };
     discipline OKS = { "Общи Компютърни системи" };
-    discipline OKSLU = { "Л.У.Общи Компютърни системи" };
     discipline Math = { "Математика" };
-    discipline MathSU = { "С.У.Математика" };
-    discipline AESU = { "С.У.Английски" };
+    discipline AE = { "Английски" };
     discipline SSP = { "ССП" };
     newStudent.disciplines[0] = ET;
-    newStudent.disciplines[1] = ETLU;
-    newStudent.disciplines[2] = ETSU;
-    newStudent.disciplines[3] = BP;
-    newStudent.disciplines[4] = BPLU;
-    newStudent.disciplines[5] = BPSU;
-    newStudent.disciplines[6] = OKS;
-    newStudent.disciplines[7] = OKSLU;
-    newStudent.disciplines[8] = Math;
-    newStudent.disciplines[9] = MathSU;
-    newStudent.disciplines[10] = AESU;
-    newStudent.disciplines[11] = SSP;
+    newStudent.disciplines[1] = BP;
+    newStudent.disciplines[2] = OKS;
+    newStudent.disciplines[3] = Math;
+    newStudent.disciplines[4] = AE;
+    newStudent.disciplines[5] = SSP;
 
     return newStudent;
+}
+
+int printStudentsMenu() {
+    int selection = 0;
+    do {
+        cout << "Въведете числото отговарящо на съответният ред." << endl;
+        cout << "1) Извеждане на всички студенти от групата."<< endl;
+        cout << "2) Назад." << endl;
+        cin >> selection;
+        system("CLS");
+    } while (selection < 1 || selection>2);
+    return selection;
+}
+
+void printStudents(int selection,int arrayCount, student(&group)[30]) {
+    if (selection == 1 && arrayCount > 0)
+    {
+        for (int i = 0; i < arrayCount;i++)
+        {
+            cout <<i+1<< ") Име: " << group[i].name << ", Факултетен номер: " << group[i].facultyId << ", пол: " << group[i].sex << ", възраст: " << group[i].age << endl;
+        }
+        int a;
+    }
+}
+
+void sortStudentsByFN(int arrayCount, student(&group)[30]) {
+
+}
+
+bool addGrades(string fn, student(&group)[30]) {
+    int stIndex=-1;
+    int addedGrades=0;
+    for (int i = 0; i < groupCount; i++)
+    {
+        if (group[i].facultyId == "")
+            continue;
+        if (group[i].facultyId == fn) 
+        {
+            stIndex = i;
+            break;
+        }
+    }
+    if (stIndex==-1)
+        return false;
+    for (int i = 0; i < disciplinesCount; i++)
+    {
+        if (group[stIndex].disciplines[i].grade != 0)
+            continue;
+        int grade;
+        string answer;
+        cout << "Да се добави ли оцента по: " << group[stIndex].disciplines[i].name << "?    (yes/no)"<<endl;
+        cin >> answer;
+        if (answer == "yes")
+        {
+            cout << "Въведете оценка по: " << group[stIndex].disciplines[i].name << endl;
+            cin >> grade;
+            group[stIndex].disciplines[i].grade = grade;
+            addedGrades++;
+        }
+        else
+            continue;
+    }
+    if (addedGrades==0)
+    {
+        cout << "Всички оценки на студента са въведени!"<<endl;
+    }
+    return true;
 }
