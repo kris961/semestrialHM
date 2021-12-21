@@ -1,8 +1,12 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <fstream>
 
 using namespace std;
+ifstream in_stream;
+ofstream out_stream;
+
 
 struct discipline {
     string name;
@@ -10,7 +14,7 @@ struct discipline {
 };
 
 struct student {
-    string facultyId;
+    int facultyId;
     string name;
     discipline disciplines[6];
     string sex;
@@ -20,23 +24,26 @@ struct student {
 
 const int disciplinesCount = 6;
 const int groupCount = 30;
+const string fileName = "students.dat";
 
 int mainMenu();
 int addStudentMenu();
-student createStudent();
+void createStudent(student group[]);
 int printStudentsMenu();
-void printStudents(int selection,int arrayCount,student (& group)[30]);
-void sortStudentsByFN(int arrayCount, student(&group)[30]);
-bool addGrades(string fn, student(&group)[30]);
+void printStudents(int selection,student group[]);
+void sortStudentsByFN(int arrayCount, student group[]);
+bool addGrades(int fn, student group []);
+void writeToFile(student group[]);
+void readFromFile(student group[]);
 
 
 void main()
 {
     setlocale(LC_ALL, "Bulgarian");
-    int arrayCount = 0;
     bool end = false;
     int code;
-    student group[30];
+    student def = { 0 };
+    student group[30] = {def};
     while (end != true) {
         code = mainMenu();
         switch (code)
@@ -47,9 +54,7 @@ void main()
                  int selection= addStudentMenu();
                  if (selection==1)
                  {
-                     student s = createStudent();
-                     group[arrayCount] = s;
-                     arrayCount++;
+                     createStudent(group);
                  }
                  else if (selection==2)
                  {
@@ -58,9 +63,7 @@ void main()
                      cin >> n;
                      for (int i = 0; i < n; i++)
                      {
-                         student s = createStudent();
-                         group[arrayCount] = s;
-                         arrayCount++;
+                         createStudent(group);
                      }
                  }
             }
@@ -72,18 +75,18 @@ void main()
         }
         case 2: {
             int selection = printStudentsMenu();
-            printStudents(selection, arrayCount, group);
+            printStudents(selection, group);
             break;
         }
         case 3: {
             bool found;
-            string fn;
+            int fn;
             student st;
             do {
 
                 cout << "Въведете Факултетният номер на ученика." << endl;
                 cin >> fn;
-                found = addGrades(fn, group);
+                found = addGrades(fn,group);
                 if (found==false)
                     cout << "Не присъства такъв студент в групата" << endl;
             } while (found==false);
@@ -92,6 +95,14 @@ void main()
         case 4: {
             end = true;
             continue;
+            break;
+        }
+        case 5: {
+            writeToFile(group);
+            break;
+        }
+        case 6: {
+            readFromFile(group);
             break;
         }
         default:
@@ -126,11 +137,11 @@ int addStudentMenu() {
     return selection;
 }
 
-student createStudent() {
-    string facultyN;
+void createStudent(student group[]) {
+    int facultyN;
     string name;
     string sex;
-    int age;
+    unsigned int age;
     try
     {
         cout << "Въвдете данните на студента в следния формат:" << endl;
@@ -152,7 +163,8 @@ student createStudent() {
     newStudent.facultyId = facultyN;
     newStudent.name = name;
     newStudent.sex = sex;
-    newStudent.status = "";
+    newStudent.status = "учащ";
+    newStudent.age = age;
 
     discipline disciplines[12];
     discipline ET = { "Електротехника" };
@@ -168,7 +180,13 @@ student createStudent() {
     newStudent.disciplines[4] = AE;
     newStudent.disciplines[5] = SSP;
 
-    return newStudent;
+    for (int i = 0; i < groupCount; i++)
+    {
+        if (group[i].facultyId == 0) {
+            group[i] = newStudent;
+            break;
+        }
+    }
 }
 
 int printStudentsMenu() {
@@ -183,27 +201,32 @@ int printStudentsMenu() {
     return selection;
 }
 
-void printStudents(int selection,int arrayCount, student(&group)[30]) {
-    if (selection == 1 && arrayCount > 0)
+void printStudents(int selection, student group[]) {
+    int printed = 0;
+    if (selection == 1)
     {
-        for (int i = 0; i < arrayCount;i++)
+        for (int i = 0; i < groupCount;i++)
         {
+            if (group[i].facultyId == 0)
+                continue;
             cout <<i+1<< ") Име: " << group[i].name << ", Факултетен номер: " << group[i].facultyId << ", пол: " << group[i].sex << ", възраст: " << group[i].age << endl;
+            printed++;
         }
-        int a;
+        if (printed == 0)
+            cout << "Няма налични студенти"<<endl;
     }
 }
 
-void sortStudentsByFN(int arrayCount, student(&group)[30]) {
+void sortStudentsByFN(student group[]) {
 
 }
 
-bool addGrades(string fn, student(&group)[30]) {
+bool addGrades(int fn, student group[]) {
     int stIndex=-1;
     int addedGrades=0;
     for (int i = 0; i < groupCount; i++)
     {
-        if (group[i].facultyId == "")
+        if (group[i].facultyId == 0)
             continue;
         if (group[i].facultyId == fn) 
         {
@@ -229,11 +252,77 @@ bool addGrades(string fn, student(&group)[30]) {
             addedGrades++;
         }
         else
-            continue;
+            continue; 
     }
     if (addedGrades==0)
     {
         cout << "Всички оценки на студента са въведени!"<<endl;
     }
     return true;
+}
+
+void writeToFile(student group[]) {
+    out_stream.open(fileName);
+    if (out_stream.fail())
+    {
+        cout << "fail";
+    }
+    for (int i = 0; i < groupCount; i++)
+    {
+        if (group[i].facultyId == 0)
+            continue;
+        out_stream << group[i].facultyId << "," << group[i].name << "," << group[i].sex << "," << group[i].age << "," << group[i].status << ",";
+        for (int j = 0; j < disciplinesCount; j++)
+        {
+            out_stream << group[i].disciplines[j].name << "-" << group[i].disciplines[j].grade<<",";
+        }
+        out_stream << endl;
+    }
+    out_stream.close();
+}
+
+void readFromFile(student group[]) {
+    in_stream.open(fileName);
+    int facultyN;
+    string name;
+    string sex;
+    int age;
+    string status;
+    string line;
+    string info;
+    int start = 0;
+    int cuts = 0;
+    while (getline(in_stream, line)) {
+        for (int i = 0; i < line.length(); i++)
+        {
+            if (i == 40)
+            {
+                cout << "d";
+            }
+            if (line[i]==',')
+            {
+                info =line.substr(start, i-start);
+                switch (cuts)
+                {
+                case 0:
+                    facultyN = stoi(info);
+                    break;
+                case 1:
+                    name = info;
+                    break;
+                case 2:
+                    sex = info;
+                    break;
+                case 3:
+                    age = stoi(info);
+                    break;
+                case 4:
+                    status = info;
+                    break;
+                }
+                start = i+1;
+                cuts++;
+            }
+        }
+    }
 }
