@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <windows.h>
+#include <iomanip>
 
 using namespace std;
 
@@ -29,8 +30,11 @@ int addStudentMenu();
 void createStudent(student group[]);
 int printStudentsMenu();
 void printStudents(int selection,student group[]);
-void sortStudentsByFN(int arrayCount, student group[]);
+void findStudentByFn(student group[]);
 bool addGrades(int fn, student group []);
+bool editGrades(int fn, student group[]);
+void changeStudentStatus(student group[]);
+int gradesMenu();
 void writeToFile(student group[]);
 void readFromFile(student group[]);
 
@@ -57,8 +61,6 @@ void main()
         switch (code)
         {
         case 1: {
-            try
-            {
                  int selection= addStudentMenu();
                  if (selection==1)
                  {
@@ -72,6 +74,7 @@ void main()
                      for (int i = 0; i < n; i++)
                      {
                          createStudent(group);
+                         if (n<i+1)
                          cout << "Желаете ли да въведете следващ ученик?    yes/no" << endl;
                          string answer;
                          cin >> answer;
@@ -81,40 +84,54 @@ void main()
                      }
                  }
                  hasChanges = true;
-            }
-            catch (const std::exception&)
-            {
-                break;
-            }
             break;
         }
         case 2: {
             int selection = printStudentsMenu();
-            printStudents(selection, group);
+            if (selection ==1)
+                printStudents(selection, group);
+            if (selection == 2)
+                findStudentByFn(group);
             break;
         }
         case 3: {
+            int selection = gradesMenu();
             bool found;
             int fn;
-            student st;
-            do {
+            if (selection == 1)
+            {
+                do {
 
+                    cout << "Въведете Факултетният номер на ученика." << endl;
+                    cin >> fn;
+                    found = addGrades(fn, group);
+                    if (found == false) {
+                        cout << "Не присъства такъв студент в групата" << endl;
+                        system("pause");
+                        break;
+                    }
+                } while (found == false);
+            }
+            if (selection == 2)
+            {
                 cout << "Въведете Факултетният номер на ученика." << endl;
                 cin >> fn;
-                found = addGrades(fn,group);
+                found = editGrades(fn, group);
                 if (found == false) {
                     cout << "Не присъства такъв студент в групата" << endl;
-                    cout << "Желаете ли да въведете оценки на друг студент? yes/no" << endl;
-                    string answer;
-                    cin >> answer;
-                    if (answer != "yes")
-                        break;
+                    system("pause");
+                    break;
                 }
-            } while (found==false);
+            }
             hasChanges = true;
             break;
         }
         case 4: {
+            changeStudentStatus(group);
+            hasChanges = true;
+            break;
+        }
+        case 5: {
             end = true;
             continue;
             break;
@@ -132,11 +149,26 @@ int mainMenu(){
         cout << "Въведете числото отговарящо на съответният ред" << endl;
         cout << "1) Добавяне студенти в група." << endl;
         cout << "2) Извеждане на студенти." << endl;
-        cout << "3) Въвеждане на оценки на студент." << endl;
-        cout << "4) Изход"<<endl;
+        cout << "3) Въвеждане и промяна на оценки на студент." << endl;
+        cout << "4) Смяна на статус на студент." << endl;
+        cout << "5) Изход"<<endl;
         cin >> selection;
         system("CLS");
         return selection;
+}
+
+int gradesMenu() {
+    int selection = 0;
+    do {
+        system("CLS");
+        cout << "Въведете числото отговарящо на съответният ред" << endl;
+        cout << "1) Въвеждане на оценки на студент." << endl;
+        cout << "2) Промяна на оценки на студент."<<endl;
+        cout << "3) Изход" << endl;
+        cin >> selection;
+        system("CLS");
+    } while (selection > 3 || selection < 1);
+    return selection;
 }
 
 int addStudentMenu() {
@@ -204,10 +236,11 @@ int printStudentsMenu() {
     do {
         cout << "Въведете числото отговарящо на съответният ред." << endl;
         cout << "1) Извеждане на всички студенти от групата."<< endl;
-        cout << "2) Назад." << endl;
+        cout << "2) Извеждане на студенти с еднвакви пътви 6 цифри от факултетен номер." << endl;
+        cout << "3) Назад." << endl;
         cin >> selection;
         system("CLS");
-    } while (selection < 1 || selection>2);
+    } while (selection < 1 || selection>3);
     return selection;
 }
 
@@ -215,21 +248,21 @@ void printStudents(int selection, student group[]) {
     int printed = 0;
     if (selection == 1)
     {
+        cout << setw(26) << left << "Име на студент" << "факултетен номер" << endl;
         for (int i = 0; i < groupCount;i++)
         {
             if (group[i].facultyId == 0)
                 continue;
-            cout <<i+1<< ") Име: " << group[i].name << ", Факултетен номер: " << group[i].facultyId << ", пол: " << group[i].sex << ", възраст: " << group[i].age << endl;
+            cout << printed << ") " << setw(20) << left << group[i].name << " - " << setw(10) << group[i].facultyId << endl;
             printed++;
         }
         if (printed == 0)
-            cout << "Няма налични студенти"<<endl;
+        {
+            system("CLS");
+            cout << "Няма налични студенти" << endl;
+        }
     }
     system("pause");
-}
-
-void sortStudentsByFN(student group[]) {
-
 }
 
 bool addGrades(int fn, student group[]) {
@@ -272,6 +305,100 @@ bool addGrades(int fn, student group[]) {
         cout << "Оценките са въведени успешно!"<<endl;
     system("pause");
     return true;
+}
+
+bool editGrades(int fn, student group[]) {
+    int stIndex = -1;
+    int editedGrades = 0;
+    for (int i = 0; i < groupCount; i++)
+    {
+        if (group[i].facultyId == 0)
+            continue;
+        if (group[i].facultyId == fn)
+        {
+            stIndex = i;
+            break;
+        }
+    }
+    if (stIndex == -1)
+        return false;
+    for (int i = 0; i < disciplinesCount; i++)
+    {
+        int grade;
+        string answer;
+        if (group[stIndex].disciplines[i].grade==0)
+            cout << "Студента няма оценка по този предмет. Да се добави ли?  (yes/no)" << endl;
+        else
+            cout << "Да се промени ли оценката по: " << group[stIndex].disciplines[i].name << "? Текуща оценка: "<<group[stIndex].disciplines[i].grade<<"(yes/no)" << endl;
+        cin >> answer;
+        if (answer == "yes")
+        {
+            cout << "Въведете оценка по: " << group[stIndex].disciplines[i].name << endl;
+            cin >> grade;
+            group[stIndex].disciplines[i].grade = grade;
+            editedGrades++;
+        }
+        else
+            continue;
+        system("CLS");
+    }
+    if (editedGrades == 0)
+        cout << "Не са направени промени по оценките на студента." << endl;
+    else
+        cout << "Оценките са променени успешно успешно!" << endl;
+    system("pause");
+    return true;
+}
+
+void findStudentByFn(student group[]) {
+    int fn;
+    do {
+        cout << "Въведете първите 6 цифри от факултетен номер." << endl;
+        cin >> fn;
+    } while (fn > 999999 || fn < 100000);
+    system("CLS");
+
+    cout << setw(26) << left << "Име на студент" << "факултетен номер" << endl;
+    int count = 0;
+    for (int i = 0; i < groupCount; i++)
+    {
+        if (to_string(group[i].facultyId).substr(0,6)==to_string(fn))
+        {
+            count++;
+            cout << count << ") "<<setw(20)<<left << group[i].name << " - "<<setw(10) << group[i].facultyId<<endl;
+        }
+    }
+    if (count==0)
+    {
+        system("CLS");
+        cout << "Не са намерени студенти с този факултетен номер!"<<endl;
+    }
+    system("Pause");
+    system("CLS");
+}
+
+void changeStudentStatus(student group[]) {
+    cout << "Въведете име на студента."<<endl;
+    char name[30];
+    cin.ignore();
+    cin.getline(name, 30);
+    bool found = false;
+    for (int i = 0; i < groupCount; i++)
+    {
+        if (strcmp(group[i].name,name)==0) {
+            strcpy_s(group[i].status, "завършил");
+            system("CLS");
+            cout << "Статуса на "<<group[i].name<<" е сменен успешно." << endl;
+            found = true;
+            break;
+        }
+    }
+    if (!found)
+    {
+        system("CLS");
+        cout << "Не е намерен такъв студент."<<endl;
+    }
+    system("pause");
 }
 
 void writeToFile(student group[30]) {
