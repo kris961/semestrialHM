@@ -263,8 +263,6 @@ void createStudent(student group[]) {
     string name;//държи името на новия студент
     string sex;//държи пола на новия студент
     unsigned int age;//държи възрастта на новия студент
-    try//прави се опит за изпълнение на кода в блока
-    {
         cout << "Въвдете данните на студента в следния формат:" << endl;
         cout << "Факултетен номер" << endl;
         cin >> facultyN;//въвежда се факултетния номер
@@ -275,12 +273,6 @@ void createStudent(student group[]) {
         cin >> sex;//въвежда се пола на студента
         cout << "Възраст" << endl;
         cin >> age;//въвежда се възрастта на студента
-    }
-    catch (const std::exception&)//при грешка при въвеждане се изпълнява кода
-    {
-        cout << "Невалидни данни";
-        return;
-    }
     student newStudent;//създава се нов студента и се присвояват съответните стойности
     newStudent.facultyId = facultyN;
     strcpy_s(newStudent.name, name.c_str());
@@ -480,7 +472,7 @@ bool editGrades(int fn, student group[]) {
     if (editedGrades == 0)//ако не са променяни оценки
         cout << "Не са направени промени по оценките на студента." << endl;
     else
-        cout << "Оценките са променени успешно успешно!" << endl;
+        cout << "Оценките са променени успешно!" << endl;
     system("pause");//програмата спира до натискане на enter
     return true;
 }
