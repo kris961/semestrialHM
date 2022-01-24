@@ -57,8 +57,10 @@ int main()
     bool hasChanges = false;//булева променлива която показва дали има промени които трябва да бъдат записани във файла
     bool end = false;//булева променлива която показва дали програмата трябва да приключи
     int code; //код който връщат менютата
+
     student def = { 0,"", {},"",0,"" };//структура която служи да стойност по подразбиране
     student group[30] = {def};//инициализира масив с 30 елемента и му задава стойност по подразбиране
+
     readFromFile(group);//чете данните от двоичния файл и ги попълва в масива
     while (end != true) { //цикълът се върти докато не се избере опция за край на програмата
         if (hasChanges) { //проверява дали има промени които трябва да се отрязат в двоичния файл
@@ -201,6 +203,7 @@ int mainMenu(){
         system("CLS");//изчиства конзолата
         return selection;//връща избора
 }
+
 //визуализира менюто за оценки
 int gradesMenu() {
     int selection = 0;//държи избора от потребителя
@@ -215,6 +218,7 @@ int gradesMenu() {
     } while (selection > 2 || selection < 0);//върти цикъла докато не се въведе наличен избор
     return selection;//връща избора
 }
+
 //визуализира менюто за добавяне на студенти
 int addStudentMenu() {
     int selection=0;//държи избора от потребителя
@@ -228,6 +232,7 @@ int addStudentMenu() {
     } while (selection < 0 || selection>2);//върти цикъла докато не се въведе наличен избор
     return selection;//връща избора
 }
+
 //виауализира менюто за извеждане на студенти
 int printStudentsMenu() {
     int selection = 0;//държи избора от потребителя
@@ -241,6 +246,7 @@ int printStudentsMenu() {
     } while (selection < 0 || selection>2);//върти цикъла докато не се въведе наличен избор
     return selection;//връща избора
 }
+
 //визуализира менюто за справки за студенти
 int allInfoMenu() {
     int selection = 0;//държи избора от потребителя
@@ -257,6 +263,7 @@ int allInfoMenu() {
     } while (selection > 4 || selection < 0);//върти цикъла докато не се въведе наличен избор
     return selection;//връща избора
 }
+
 //създава нов студент
 void createStudent(student group[]) {
     int facultyN;//държи факултетния номер на новия студент
@@ -297,8 +304,9 @@ void createStudent(student group[]) {
         }
     }
 }
+
 //извежда всички студенти
-void printStudents(student group[]) {
+void printStudents(student group[])  {
     int page = 1;//номера на текущата страница
     int start = 0;//началния индекс от който ще се извеждат студенти
     int end = 5;//последния индекс до който ще се извежда студенти
@@ -333,6 +341,7 @@ void printStudents(student group[]) {
         }
     system("pause");//програмата спира до натискане на enter
 }
+
 //извежда справки за студентите които за подадени на функцията
 void printStudentsAllInfo(student group[], string sex) {//аргиментите са масив от студенти които ще се принтират и полът на студентите които трябва да се изкарат
     int printed = 0;//държи броя на принтираните студенти
@@ -373,6 +382,7 @@ void printStudentsAllInfo(student group[], string sex) {//аргиментите са масив о
     }
     system("pause");//програмата спира до натискане на enter
 }
+
 //въвежда се има на студента и се променя статусът му
 void changeStudentStatus(student group[]) {
     cout << "Въведете име на студента." << endl;
@@ -397,6 +407,7 @@ void changeStudentStatus(student group[]) {
     }
     system("pause");//програмата спира до натискане на enter
 }
+
 //търси се студент по факултетен номер и връща дали е намерен и ако е се добавят оценки
 bool addGrades(int fn, student group[]) {
     int stIndex=-1;//държи индекса на студента
@@ -439,6 +450,7 @@ bool addGrades(int fn, student group[]) {
     system("pause");//програма спира до натискане на enter
     return true;
 }
+
 //търи се студент по факултетен номер и връща дали е намерен и ако се променят оценките
 bool editGrades(int fn, student group[]) {
     int stIndex = -1;//държи индекса на студента
@@ -482,6 +494,7 @@ bool editGrades(int fn, student group[]) {
     system("pause");//програмата спира до натискане на enter
     return true;
 }
+
 //търсят се студенти с еднакви първи 6 цифри на факултетния номер 
 void findStudentByFn(student group[]) {
     int fn;//факултетния номер
@@ -509,6 +522,7 @@ void findStudentByFn(student group[]) {
     system("Pause");//програмата спира до натискане на enter
     system("CLS");//изчиства се конзолата
 }
+
 //сортират се студентите по възраст възходящо
 student* sortByAgeAndSexAsc(student group[]) {
     student temp;//пази стойността на един от студентите
@@ -527,6 +541,7 @@ student* sortByAgeAndSexAsc(student group[]) {
     }
     return sorted;
 }
+
 //сортират се студентите по възраст в низходящ ред
 student* sortByAgeDesc(student group[]) {
     student temp;//пази стойността на един от студентите
@@ -545,6 +560,7 @@ student* sortByAgeDesc(student group[]) {
     }
     return sortedGroup;
 }
+
 //сортират се студентите по има в азбучен ред
 student* sortByName(student group[]) {
     student temp;//пази стойността на един от студентите
@@ -563,6 +579,7 @@ student* sortByName(student group[]) {
     }
     return sorted;
 }
+
 //намира и връща студента с най-висок среден успех
 student findStudentWithBiggestAvg(student group[]) {
     int bestStudentIndex = 0;//пази индекса на студента с най-висок среден успех
@@ -584,24 +601,38 @@ student findStudentWithBiggestAvg(student group[]) {
     }
     return group[bestStudentIndex];//връща се студента с най-висок успех
 }
+
 //запазва данните в двоичен файл
 void writeToFile(student group[30]) {
     fstream file;
-    file.open(fileName, ios::binary | ios::out);//отваря се файла
-    file.write((char*)group, groupCount * (sizeof(student)));//записват се данните от файла
-    file.close();//затваре са файла
+        file.open(fileName, ios::binary | ios::out);//отваря се файла
+    if (file.is_open())
+    {
+        file.write((char*)group, groupCount * (sizeof(student)));//записват се данните от файла
+        file.close();//затваре са файла
+    }
+    else {
+        cout << endl << "Грешка при отварянето на файла";
+    }
         //cout << "Неуспешно отваряне на фаила!" << endl;
 }
+
 //чете данни от двоичен файл
 void readFromFile(student group[]) {
     fstream file;
     file.open(fileName, ios::binary | ios::in);//отваря се файл
-    file.seekg(0L, ios::end);//слага се селектора в края на файла
-    long pos = (long)file.tellg();//намира се размера до селектора
-    file.seekg(0L, ios::beg);//слага се селектора в началото на файла
-    file.close();//затваря се файла
-    int n = pos / (sizeof(student));
-    file.open(fileName, ios::binary | ios::in);//отваря се файл
-    file.read((char*)group, n * (sizeof(student)));//чете се от файла
-    file.close();//затваря се файла
+    if (file.is_open())
+    {
+        file.seekg(0L, ios::end);//слага се селектора в края на файла
+        long pos = (long)file.tellg();//намира се размера до селектора
+        file.seekg(0L, ios::beg);//слага се селектора в началото на файла
+        file.close();//затваря се файла
+        int n = pos / (sizeof(student));
+        file.open(fileName, ios::binary | ios::in);//отваря се файл
+        file.read((char*)group, n * (sizeof(student)));//чете се от файла
+        file.close();//затваря се файла
+    }
+    else {
+        cout << endl << "Грешка при отварянето на файла";
+    }
 }
